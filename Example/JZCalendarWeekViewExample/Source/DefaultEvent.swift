@@ -13,16 +13,23 @@ class DefaultEvent: JZBaseEvent {
 
     var location: String
     var title: String
+    var id: String
+    var startDate: Date
+    var endDate: Date
+    var intraStartDate: Date
+    var intraEndDate: Date
 
     init(id: String, title: String, startDate: Date, endDate: Date, location: String) {
-        self.location = location
+        self.id = id
         self.title = title
-
-        // If you want to have you custom uid, you can set the parent class's id with your uid or UUID().uuidString (In this case, we just use the base class id)
-        super.init(id: id, startDate: startDate, endDate: endDate)
+        self.startDate = startDate
+        self.endDate = endDate
+        self.intraStartDate = startDate
+        self.intraEndDate = endDate
+        self.location = location
     }
-
-    override func copy(with zone: NSZone?) -> Any {
+    
+    func copy(with zone: NSZone? = nil) -> Any {
         return DefaultEvent(id: id, title: title, startDate: startDate, endDate: endDate, location: location)
     }
 }

@@ -35,7 +35,7 @@ class CustomWeekView: JZBaseWeekView {
     override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         if kind == JZSupplementaryViewKinds.rowHeader {
             if let rowHeader = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: HourRowHeader.className, for: indexPath) as? HourRowHeader {
-                rowHeader.updateView(date: flowLayout.timeForRowHeader(at: indexPath))
+                rowHeader.updateView(date: flowLayout.timeForRowHeader(at: indexPath), numOfDays: numOfDays)
                 return rowHeader
             }
             preconditionFailure("HourRowHeader should be casted")

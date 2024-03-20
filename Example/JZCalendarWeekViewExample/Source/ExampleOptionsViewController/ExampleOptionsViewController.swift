@@ -9,7 +9,7 @@
 import UIKit
 import JZCalendarWeekView
 
-protocol OptionsViewDelegate: class {
+protocol OptionsViewDelegate: AnyObject {
     func finishUpdate(selectedData: OptionsSelectedData)
 }
 
