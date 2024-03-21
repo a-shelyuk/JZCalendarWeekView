@@ -40,7 +40,7 @@ open class JZColumnHeader: UICollectionReusableView {
         lblWeekday.font = UIFont.systemFont(ofSize: 12)
     }
 
-    public func updateView(date: Date, numOfDays: Int) {
+    open func updateView(date: Date, numOfDays: Int) {
         let weekday = calendarCurrent.component(.weekday, from: date) - 1
 
         lblDay.text = String(calendarCurrent.component(.day, from: date))

@@ -36,7 +36,7 @@ open class JZRowHeader: UICollectionReusableView {
         lblTime.font = UIFont.systemFont(ofSize: 12)
     }
 
-    public func updateView(date: Date, numOfDays: Int) {
+    open func updateView(date: Date, numOfDays: Int) {
         lblTime.text = dateFormatter.string(from: date)
     }
 
