@@ -7,7 +7,7 @@
 //
 import UIKit
 
-public protocol JZBaseViewDelegate: class {
+public protocol JZBaseViewDelegate: AnyObject {
 
     /// When initDate changed, this function will be called. You can get the current date by adding numOfDays on initDate
     ///
@@ -331,6 +331,16 @@ open class JZBaseWeekView: UIView {
         return dates
     }
 
+    /// Load the page after horizontal scroll action.
+    ///
+    /// Can be overridden to do some operations before reload.
+    open func loadPage() {
+        // It means collectionView is scrolling back to previous contentOffsetX or It is vertical scroll
+        // Each scroll should always start from the middle, which is contentViewWidth
+        if collectionView.contentOffset.x == contentViewWidth { return }
+        scrollType == .pageScroll ? loadPagePageScroll() : loadPageSectionScroll()
+    }
+    
     /**
         Used to Refresh the weekView when viewWillTransition
      
@@ -347,6 +357,23 @@ open class JZBaseWeekView: UIView {
         if diff < 0 { diff = 7 - abs(diff) }
         self.initDate = setDate.startOfDay.add(component: .day, value: -numOfDays - diff)
         self.firstDayOfWeek = firstDayOfWeek
+    }
+    
+    /// Get the section Type current timeline
+    open func getSectionTypeCurrentTimeline(timeline: JZCurrentTimelineSection, indexPath: IndexPath) -> UICollectionReusableView {
+        let date = flowLayout.dateForColumnHeader(at: indexPath)
+        timeline.isHidden = !date.isToday
+        return timeline
+    }
+
+    /// Get the page Type current timeline
+    /// Rules are quite confused for now
+    open func getPageTypeCurrentTimeline(timeline: JZCurrentTimelinePage, indexPath: IndexPath) -> UICollectionReusableView {
+        let date = flowLayout.dateForColumnHeader(at: indexPath)
+        let daysToToday = Date.daysBetween(start: date, end: Date(), ignoreHours: true)
+        timeline.isHidden = abs(daysToToday) > numOfDays - 1
+        timeline.updateView(needShowBallView: daysToToday == 0)
+        return timeline
     }
 
     // MARK: - Date related getters
@@ -456,12 +483,12 @@ extension JZBaseWeekView: UICollectionViewDataSource {
         switch kind {
         case JZSupplementaryViewKinds.columnHeader:
             if let columnHeader = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: kind, for: indexPath) as? JZColumnHeader {
-                columnHeader.updateView(date: flowLayout.dateForColumnHeader(at: indexPath))
+                columnHeader.updateView(date: flowLayout.dateForColumnHeader(at: indexPath), numOfDays: numOfDays)
                 view = columnHeader
             }
         case JZSupplementaryViewKinds.rowHeader:
             if let rowHeader = collectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: kind, for: indexPath) as? JZRowHeader {
-                rowHeader.updateView(date: flowLayout.timeForRowHeader(at: indexPath))
+                rowHeader.updateView(date: flowLayout.timeForRowHeader(at: indexPath), numOfDays: numOfDays)
                 view = rowHeader
             }
         case JZSupplementaryViewKinds.cornerHeader:
@@ -575,16 +602,6 @@ extension JZBaseWeekView: UICollectionViewDelegate, UICollectionViewDelegateFlow
         targetContentOffset.pointee = CGPoint(x: shouldScrollToContentOffsetX, y: currentContentOffset.y)
     }
 
-    /// Load the page after horizontal scroll action.
-    ///
-    /// Can be overridden to do some operations before reload.
-    open func loadPage() {
-        // It means collectionView is scrolling back to previous contentOffsetX or It is vertical scroll
-        // Each scroll should always start from the middle, which is contentViewWidth
-        if collectionView.contentOffset.x == contentViewWidth { return }
-        scrollType == .pageScroll ? loadPagePageScroll() : loadPageSectionScroll()
-    }
-
     // sectionScroll load page
     private func loadPageSectionScroll() {
         let currentDate = getDateForContentOffsetX(collectionView.contentOffset.x)
@@ -612,28 +629,6 @@ extension JZBaseWeekView: UICollectionViewDelegate, UICollectionViewDelegateFlow
         let addValue = isNext ? numOfDays : -numOfDays
         self.initDate = self.initDate.add(component: .day, value: addValue!)
         self.forceReload()
-    }
-
-}
-
-// MARK: - Current time line
-extension JZBaseWeekView {
-
-    /// Get the section Type current timeline
-    open func getSectionTypeCurrentTimeline(timeline: JZCurrentTimelineSection, indexPath: IndexPath) -> UICollectionReusableView {
-        let date = flowLayout.dateForColumnHeader(at: indexPath)
-        timeline.isHidden = !date.isToday
-        return timeline
-    }
-
-    /// Get the page Type current timeline
-    /// Rules are quite confused for now
-    open func getPageTypeCurrentTimeline(timeline: JZCurrentTimelinePage, indexPath: IndexPath) -> UICollectionReusableView {
-        let date = flowLayout.dateForColumnHeader(at: indexPath)
-        let daysToToday = Date.daysBetween(start: date, end: Date(), ignoreHours: true)
-        timeline.isHidden = abs(daysToToday) > numOfDays - 1
-        timeline.updateView(needShowBallView: daysToToday == 0)
-        return timeline
     }
 
 }
